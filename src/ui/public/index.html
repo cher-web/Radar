@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Radar</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="onboarding" class="onboarding" hidden>
+    <span class="onboarding-title">Set up Radar</span>
+    <div class="onboarding-steps">
+      <button type="button" class="onboarding-step" data-step="key">
+        <span class="step-mark">○</span>1. Add API key
+      </button>
+      <button type="button" class="onboarding-step" data-step="login">
+        <span class="step-mark">○</span>2. Log into Instagram
+      </button>
+      <button type="button" class="onboarding-step" data-step="account">
+        <span class="step-mark">○</span>3. Add an account
+      </button>
+    </div>
+    <button type="button" class="onboarding-dismiss" aria-label="Dismiss" onclick="dismissOnboarding(event)">×</button>
+  </div>
+  <header>
+    <h1>Radar</h1>
+    <div class="actions">
+      <span id="scan-status" class="scan-status"></span>
+      <button id="scan-btn" class="primary">Scan now</button>
+      <button id="settings-btn" class="ghost" aria-label="Settings">⚙</button>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <h2>Accounts</h2>
+      <ul id="accounts-list" class="accounts"></ul>
+      <form id="add-account-form" class="add-account">
+        <input name="username" placeholder="@handle" required autocomplete="off">
+        <select name="tag" id="tag-select">
+          <option value="venue">venue</option>
+          <option value="music">music</option>
+          <option value="art">art</option>
+          <option value="promoter">promoter</option>
+          <option value="gallery">gallery</option>
+          <option value="festival">festival</option>
+          <option value="collective">collective</option>
+        </select>
+        <button type="submit">Add</button>
+      </form>
+    </aside>
+
+    <section>
+      <div class="events-header">
+        <h2>Events</h2>
+        <div id="filter-bar" class="filter-bar" hidden>
+          <span id="filter-summary"></span>
+          <button type="button" id="clear-filter" class="ghost small">Clear</button>
+        </div>
+      </div>
+      <div id="scan-progress" class="scan-progress" hidden>
+        <div class="scan-progress-track"><div class="scan-progress-fill"></div></div>
+        <div class="scan-progress-label"></div>
+      </div>
+      <div class="date-filters" id="date-filters">
+        <button type="button" data-range="today">Today</button>
+        <button type="button" data-range="week">Week</button>
+        <button type="button" data-range="future" class="active">Future</button>
+        <button type="button" data-range="past">Past</button>
+        <button type="button" data-range="tbd">Date TBD</button>
+      </div>
+      <div id="events" class="events">
+        <p class="empty">Loading…</p>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="settings-modal">
+    <form method="dialog">
+      <h2>Settings</h2>
+
+      <section class="setting-block">
+        <label>Vision model</label>
+        <div class="provider-toggle" id="provider-toggle">
+          <button type="button" data-provider="claude" class="active">Claude</button>
+          <button type="button" data-provider="gemini">Gemini</button>
+        </div>
+        <p class="hint" id="provider-hint"></p>
+      </section>
+
+      <section class="setting-block" id="anthropic-key-block">
+        <label for="anthropic-key">Anthropic API key</label>
+        <div class="row">
+          <input id="anthropic-key" type="password" placeholder="sk-ant-…" autocomplete="off">
+          <button type="button" id="save-anthropic-key" class="primary">Save</button>
+        </div>
+        <p class="hint" id="anthropic-key-hint"></p>
+      </section>
+
+      <section class="setting-block" id="google-key-block">
+        <label for="google-key">Google (Gemini) API key</label>
+        <div class="row">
+          <input id="google-key" type="password" placeholder="AIza…" autocomplete="off">
+          <button type="button" id="save-google-key" class="primary">Save</button>
+        </div>
+        <p class="hint" id="google-key-hint"></p>
+      </section>
+
+      <section class="setting-block">
+        <label>Instagram session</label>
+        <p class="hint" id="auth-status"></p>
+        <div class="row">
+          <button type="button" id="login-btn" class="primary">Log in / re-authenticate</button>
+          <button type="button" id="logout-btn" class="ghost">Log out</button>
+        </div>
+        <p class="hint" id="login-hint" hidden></p>
+      </section>
+
+      <div class="row end">
+        <button type="submit" class="ghost">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script>
+    window.dismissOnboarding = function (e) {
+      if (e) { e.stopPropagation(); e.preventDefault(); }
+      try { localStorage.setItem('radar.onboarding.dismissed', '1'); } catch {}
+      const bar = document.getElementById('onboarding');
+      if (bar) bar.hidden = true;
+      document.body.classList.remove('has-onboarding');
+    };
+  </script>
+  <script src="/app.js"></script>
+</body>
+</html>

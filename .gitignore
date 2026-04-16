@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.local
+radar.db
+screenshots/
+digests/
+spikes/out/
+.DS_Store
