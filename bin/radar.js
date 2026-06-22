@@ -66,13 +66,20 @@ accountsCmd
   .description('Export accounts to a shareable accounts.json file')
   .action((path) => accounts.exportFile(path));
 
-program
+const eventsRootCmd = program
   .command('events')
   .description('Show extracted events')
   .option('--all', 'include past and low-confidence events')
   .option('--upcoming', 'show only upcoming events (default)')
   .option('--since <N>', 'events found in the last Nd (e.g. 7d)')
   .action((opts) => eventsCmd.events(opts));
+
+eventsRootCmd
+  .command('dedupe')
+  .description('Detect and merge duplicate events (venue+date+name)')
+  .option('--apply', 'persist merges to the DB (default is dry run)')
+  .option('--reset', 'unmerge all previously merged events')
+  .action((opts) => opts.reset ? eventsCmd.dedupeReset() : eventsCmd.dedupe(opts));
 
 program
   .command('digest')

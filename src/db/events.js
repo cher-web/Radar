@@ -38,10 +38,11 @@ export function insertEvent(e) {
   return id;
 }
 
-export function listEvents({ upcomingOnly = false, sinceDays = null } = {}) {
+export function listEvents({ upcomingOnly = false, sinceDays = null, includeMerged = false } = {}) {
   const db = getDb();
   const clauses = [];
   const args = [];
+  if (!includeMerged) clauses.push(`merged_into IS NULL`);
   if (upcomingOnly) clauses.push(`(event_date IS NULL OR event_date >= date('now'))`);
   if (sinceDays != null) {
     clauses.push(`found_at >= datetime('now', ?)`);
@@ -52,4 +53,23 @@ export function listEvents({ upcomingOnly = false, sinceDays = null } = {}) {
     CASE WHEN event_date IS NULL THEN 1 ELSE 0 END,
     event_date ASC, found_at DESC`;
   return db.prepare(sql).all(...args);
+}
+
+export function applyMerges(merges) {
+  const db = getDb();
+  const stmt = db.prepare(`UPDATE events SET merged_into = ? WHERE id = ? AND merged_into IS NULL`);
+  const tx = db.transaction((pairs) => {
+    let n = 0;
+    for (const { loserId, winnerId } of pairs) {
+      const r = stmt.run(winnerId, loserId);
+      n += r.changes;
+    }
+    return n;
+  });
+  return tx(merges);
+}
+
+export function unmergeAll() {
+  const db = getDb();
+  return db.prepare(`UPDATE events SET merged_into = NULL WHERE merged_into IS NOT NULL`).run().changes;
 }

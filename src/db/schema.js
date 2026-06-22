@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS events (
   confidence      TEXT,
   screenshot_path TEXT,
   raw_response    TEXT,
-  found_at        TEXT NOT NULL
+  found_at        TEXT NOT NULL,
+  merged_into     TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_events_account     ON events(account);

@@ -15,7 +15,16 @@ export function getDb() {
   _db.pragma('journal_mode = WAL');
   _db.pragma('foreign_keys = ON');
   _db.exec(SCHEMA_SQL);
+  migrate(_db);
   return _db;
+}
+
+function migrate(db) {
+  const cols = db.prepare(`PRAGMA table_info(events)`).all();
+  if (!cols.some((c) => c.name === 'merged_into')) {
+    db.exec(`ALTER TABLE events ADD COLUMN merged_into TEXT`);
+  }
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_events_merged_into ON events(merged_into)`);
 }
 
 export function closeDb() {

@@ -27,8 +27,8 @@ function serializeEvent(row, screenshotUrl) {
  * Returns { events, uploaded, skipped }.
  */
 export async function publishToR2({ logger = () => {} } = {}) {
-  const rows = listEvents({ upcomingOnly: true });
-  logger(`publishing ${rows.length} upcoming events`);
+  const rows = listEvents({ upcomingOnly: false });
+  logger(`publishing ${rows.length} events`);
 
   let uploaded = 0;
   let skipped = 0;

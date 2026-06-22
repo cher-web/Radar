@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { listEvents } from '../../db/events.js';
 import { loadAccounts } from '../../config/accounts.js';
 import { groupForDigest } from '../../digest/group.js';
+import { dedupeEvents } from '../../digest/dedupe.js';
 import { formatDigest } from '../../digest/format.js';
 import { info, ok } from '../output.js';
 
@@ -13,8 +14,10 @@ export async function digest(opts) {
   const minConfidence = opts.all ? 'low' : 'medium';
 
   const rows = listEvents({ upcomingOnly: true });
-  const buckets = groupForDigest(rows, { minConfidence, upcomingOnly: true });
   const store = await loadAccounts();
+  const tagByAccount = new Map(store.accounts.map((a) => [a.username, a.tag]));
+  const deduped = dedupeEvents(rows, { accountTagFor: (a) => tagByAccount.get(a) });
+  const buckets = groupForDigest(deduped, { minConfidence, upcomingOnly: true });
   const accountCount = store.accounts.filter((a) => a.active !== false).length;
 
   const out = formatDigest(buckets, {
